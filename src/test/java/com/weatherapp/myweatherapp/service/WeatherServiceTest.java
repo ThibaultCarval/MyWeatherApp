@@ -37,7 +37,7 @@ class WeatherServiceTest {
     public void load_WeatherController() {
         testWeatherRepo = new VisualcrossingRepository(
                 "https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/",
-                "removed");
+                "NVPMMQN5ZFM8UF22TVR2MTXZT");
         testWeatherService = new WeatherService(testWeatherRepo);
     }
 
