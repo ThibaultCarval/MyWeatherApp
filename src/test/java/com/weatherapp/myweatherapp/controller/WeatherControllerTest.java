@@ -42,23 +42,26 @@ public class WeatherControllerTest {
         testWeatherController = new WeatherController(testWeatherService);
     }
 
+    /*
+     * Test that the correct response is received from the API
+     * Tested by checking Address for a given request.
+     */
     @Test
     void verify_AccessForecast() throws Exception {
         System.out.println("Tests | verify_AccessForecast");
-
-//        MockHttpServletResponse r = mvc.perform(get("/forecast/" + "Paris")).andExpect(status().isOk()).andReturn().getResponse();
-//        assert r.getContentAsString().contains("Paris");
 
         CityInfo cityInfo = testWeatherController.forecastByCity("Paris").getBody();
 
         assert cityInfo.getAddress().equalsIgnoreCase("Paris");
     }
 
+    /*
+     * Test that the timestamps are correctly converted to seconds elapsed since midnight
+     */
     @Test
     void verify_correct_getSecondsFromTimestamp() throws Exception {
         System.out.println("Tests | WeatherController.getSecondsFromTimestamp -> correct conversion of timestamp");
         // WeatherController.getSecondsFromTimestamp -> correct conversion of timestamp
-
 
         assert testWeatherController.getSecondsFromTimestamp("00:00:00") == 0;
         assert testWeatherController.getSecondsFromTimestamp("00:00:10") == 10;
@@ -66,6 +69,9 @@ public class WeatherControllerTest {
 
     }
 
+    /*
+     * Test that an incorrect timestamp format is rejected
+     */
     @Test
     void verify_incorrect_getSecondsFromTimestamp() throws Exception {
         System.out.println("Tests | WeatherController.getSecondsFromTimestamp -> invalid timestamp raises exception");
@@ -79,6 +85,9 @@ public class WeatherControllerTest {
 
     }
 
+    /*
+     * Test that we get the correct daylight duration for a typical day with defined (non-null) sunrise and sunset
+     */
     @Test
     void verify_getDaylightHours_notNull() throws Exception {
         System.out.println("Tests | WeatherController.getDaylightHours -> Both timestamps not null");
@@ -93,6 +102,9 @@ public class WeatherControllerTest {
         assert daylight == (18*3600+45*60+31)-(10*3600+22*60+37);
     }
 
+    /*
+     * Test that we get the correct daylight duration for a day with undefined (null) sunrise and sunset, during Polar Day.
+     */
     @Test
     void verify_getDaylightHours_bothNullPolarDay() throws Exception {
         System.out.println("Tests | WeatherController.getDaylightHours -> Both timestamps null, polar day");
@@ -107,6 +119,9 @@ public class WeatherControllerTest {
         assert daylight == 24*3600;
     }
 
+    /*
+     * Test that we get the correct daylight duration for a day with undefined (null) sunrise and sunset, during Polar night.
+     */
     @Test
     void verify_getDaylightHours_bothNullPolarNight() throws Exception {
         System.out.println("Tests | WeatherController.getDaylightHours -> Both timestamps null, polar night");
@@ -121,6 +136,10 @@ public class WeatherControllerTest {
         assert daylight == 0;
     }
 
+    /*
+     * Test that we get the correct daylight duration for a day with undefined (null) sunrise and defined (non-null) sunset.
+     * This can happen over the polar circle, at the end of polar day.
+     */
     @Test
     void verify_getDaylightHours_riseNull() throws Exception {
         System.out.println("Tests | WeatherController.getDaylightHours -> sunrise null, sunset not null");
@@ -134,6 +153,11 @@ public class WeatherControllerTest {
 
         assert daylight == 18*3600+45*60+31;
     }
+
+    /*
+     * Test that we get the correct daylight duration for a day with defined (non-null) sunrise and undefined (null) sunset.
+     * This can happen over the polar circle, at the beginning of polar day.
+     */
     @Test
     void verify_getDaylightHours_setNull() throws Exception {
         System.out.println("Tests | WeatherController.getDaylightHours -> sunrise not null, sunset null");
@@ -147,6 +171,10 @@ public class WeatherControllerTest {
 
         assert daylight == 24*3600-(10*3600+22*60+37);
     }
+
+    /*
+     * Test that a null CityInfo argument throws an Exception
+     */
     @Test
     void verify_getDaylightHours_checkNull() throws Exception {
         System.out.println("Tests | WeatherController.getDaylightHours -> cityinfo null");
@@ -159,6 +187,11 @@ public class WeatherControllerTest {
 
         throw new Exception("WeatherController.getDaylightHours -> null checks should have failed");
     }
+
+    /*
+     * Test that when two identical CityInfos are passed, we get no undefined behaviour, 
+     * just the first CityInfo (as both are identical)
+     */
     @Test
     void verify_compareDaylightHours_repeatCity() throws Exception {
         System.out.println("Tests | WeatherController.compareDaylightHours -> Same city twice");
@@ -168,6 +201,10 @@ public class WeatherControllerTest {
         CityInfo cityInfo = Objects.requireNonNull(responseEntity.getBody());
         assert cityInfo.getAddress().equalsIgnoreCase("Paris");
     }
+
+    /*
+     * Test that the result is independent of the Cities' order.
+     */
     @Test
     void verify_compareDaylightHours_permutations() throws Exception {
         System.out.println("Tests | WeatherController.compareDaylightHours -> two cities, both permutations, same return");
@@ -180,6 +217,10 @@ public class WeatherControllerTest {
         assert responseEntityA.getAddress().equalsIgnoreCase(responseEntityB.getAddress());
 
     }
+
+    /*
+     * Test that a null City argument throws an Exception
+     */
     @Test
     void verify_compareDaylightHours_checkNull() throws Exception {
         System.out.println("Tests | WeatherController.compareDaylightHours -> null checks");
@@ -191,7 +232,10 @@ public class WeatherControllerTest {
         throw new Exception("WeatherController.compareDaylightHours -> null checks should have failed");
 
     }
-
+    
+    /*
+     * Test that the rain identification is correct
+     */
     @Test
     void verify_compareRain() throws Exception {
         System.out.println("Tests | WeatherController.compareRain -> Works properly");
@@ -209,6 +253,10 @@ public class WeatherControllerTest {
         assert cityInfos.size() == 1;
         assert cityInfos.get(0).getAddress().equalsIgnoreCase("TestingA");
     }
+
+    /*
+     * Test that a null CityInfo argument throws an Exception
+     */
     @Test
     void verify_compareRain_nullCheck() throws Exception {
         System.out.println("Tests | WeatherController.compareRain -> nullCheck");
